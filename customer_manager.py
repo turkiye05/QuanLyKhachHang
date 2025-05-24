@@ -34,6 +34,13 @@ class CustomerManager:
             print(f"Lỗi khi tải dữ liệu: {e}")
             self.customers = []
     
+    def reload_data(self):
+        """
+        Tải lại dữ liệu từ file JSON
+        """
+        self.load_data()
+        return self.customers
+    
     def save_data(self):
         """
         Lưu dữ liệu khách hàng ra file JSON

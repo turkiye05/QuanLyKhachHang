@@ -280,8 +280,8 @@ class MainUI:
         for item in self.customer_tree.get_children():
             self.customer_tree.delete(item)
         
-        # Lấy danh sách khách hàng từ customer_manager
-        customers = self.customer_manager.get_all_customers()
+        # Tải lại dữ liệu từ file
+        customers = self.customer_manager.reload_data()
         
         # Thêm các khách hàng vào treeview
         for customer in customers:
