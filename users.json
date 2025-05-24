@@ -1,0 +1,19 @@
+[
+    {
+        "id": "1",
+        "username": "admin",
+        "password": "240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9",
+        "full_name": "Administrator",
+        "role": "admin",
+        "created_at": "2025-04-19 20:24:07",
+        "updated_at": "2025-04-19 20:34:54"
+    },
+    {
+        "id": "1745459447859681",
+        "username": "nnam167",
+        "password": "dec58ab7d7f9fb6bd366cea633274ef3632f8eaa823bf811c14bed255d60e339",
+        "full_name": "Nguyễn Đức Nam",
+        "role": "user",
+        "created_at": "2025-04-24 08:50:47"
+    }
+]

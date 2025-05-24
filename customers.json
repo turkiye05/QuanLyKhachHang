@@ -1,0 +1,70 @@
+[
+    {
+        "name": "Nguyen Duc Nam",
+        "email": "nnam160705@gmail.com",
+        "phone": "0855697879",
+        "address": "36/19 Tran Tan",
+        "gender": "male",
+        "age": 20,
+        "id": "1745064463748927",
+        "created_at": "2025-04-19 19:07:43",
+        "picture": "",
+        "updated_at": "2025-04-19 20:17:36"
+    },
+    {
+        "id": "17450694222413642587",
+        "name": "Stella Lawrence",
+        "email": "stella.lawrence@example.com",
+        "phone": "(399) 561-5318",
+        "address": "2452 Mcgowen St, Waxahachie, Louisiana, United States",
+        "gender": "female",
+        "age": 32,
+        "picture": "https://randomuser.me/api/portraits/women/36.jpg",
+        "created_at": "2025-04-19 20:30:22"
+    },
+    {
+        "id": "17450694222413649949",
+        "name": "Howard Reynolds",
+        "email": "howard.reynolds@example.com",
+        "phone": "(214) 709-0611",
+        "address": "8102 Sunset St, Manchester, South Dakota, United States",
+        "gender": "male",
+        "age": 32,
+        "picture": "https://randomuser.me/api/portraits/men/45.jpg",
+        "created_at": "2025-04-19 20:30:22"
+    },
+    {
+        "id": "17450694222413641593",
+        "name": "Clifton Lambert",
+        "email": "clifton.lambert@example.com",
+        "phone": "85555555",
+        "address": "479 W 6th St, San Diego, Iowa, United States",
+        "gender": "male",
+        "age": 34,
+        "picture": "https://randomuser.me/api/portraits/men/34.jpg",
+        "created_at": "2025-04-19 20:30:22",
+        "updated_at": "2025-05-24 15:33:04"
+    },
+    {
+        "id": "17450694222413649125",
+        "name": "David Kennedy",
+        "email": "david.kennedy@example.com",
+        "phone": "(542) 622-2453",
+        "address": "4154 W Pecan St, Jackson, Iowa, United States",
+        "gender": "female",
+        "age": 46,
+        "picture": "https://randomuser.me/api/portraits/men/26.jpg",
+        "created_at": "2025-04-19 20:30:22",
+        "updated_at": "2025-04-19 21:29:06"
+    },
+    {
+        "name": "Nguyên Văn A",
+        "email": "aaaa@",
+        "phone": "08554477",
+        "address": "123 Apt",
+        "gender": "male",
+        "age": 22,
+        "id": "1748076683652861",
+        "created_at": "2025-05-24 15:51:23"
+    }
+]
