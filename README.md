@@ -75,7 +75,6 @@
 - **Tìm kiếm**: Nhập từ khóa vào ô tìm kiếm và nhấn "Tìm"
 - **Thêm mới**: Nhấn nút "Thêm mới" hoặc chọn menu "Khách hàng > Thêm khách hàng"
 - **Xem chi tiết**: Click đúp vào một khách hàng trong danh sách
-- **Chỉnh sửa**: Click chuột phải vào khách hàng và chọn "Chỉnh sửa"
 - **Xóa**: Click chuột phải vào khách hàng và chọn "Xóa"
 
 ### Quản lý người dùng (chỉ admin)

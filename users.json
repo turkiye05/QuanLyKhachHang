@@ -6,14 +6,18 @@
         "full_name": "Administrator",
         "role": "admin",
         "created_at": "2025-04-19 20:24:07",
-        "updated_at": "2025-04-19 20:34:54"
+        "updated_at": "2025-06-04 14:27:57",
+        "picture": "user_images\\user_1.png"
     },
     {
-        "id": "1745459447859681",
-        "username": "nnam167",
-        "password": "dec58ab7d7f9fb6bd366cea633274ef3632f8eaa823bf811c14bed255d60e339",
-        "full_name": "Nguyễn Đức Nam",
+        "id": "NV2865",
+        "username": "nam",
+        "password": "96cae35ce8a9b0244178bf28e4966c2ce1b8385723a96a6b838858cdd6ca0a1e",
+        "full_name": "Nguyen Nam",
+        "phone": "",
         "role": "user",
-        "created_at": "2025-04-24 08:50:47"
+        "created_at": "2025-06-06 11:22:22",
+        "picture": "user_images\\user_NV2865.jpg",
+        "updated_at": "2025-06-06 11:24:56"
     }
 ]

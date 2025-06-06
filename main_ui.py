@@ -257,7 +257,6 @@ class MainUI:
         # Tạo menu ngữ cảnh cho treeview
         self.user_context_menu = tk.Menu(self.user_tree, tearoff=0)
         self.user_context_menu.add_command(label="Xem chi tiết", command=self.view_selected_user)
-        self.user_context_menu.add_command(label="Chỉnh sửa", command=self.edit_selected_user)
         self.user_context_menu.add_command(label="Xóa", command=self.delete_selected_user)
         
         # Bind chuột phải để hiển thị menu ngữ cảnh
@@ -276,25 +275,41 @@ class MainUI:
         """
         Tải danh sách khách hàng vào treeview
         """
-        # Xóa tất cả các mục hiện tại
-        for item in self.customer_tree.get_children():
-            self.customer_tree.delete(item)
-        
-        # Tải lại dữ liệu từ file
-        customers = self.customer_manager.reload_data()
-        
-        # Thêm các khách hàng vào treeview
-        for customer in customers:
-            values = (
-                customer.get("id", ""),
-                customer.get("name", ""),
-                customer.get("email", ""),
-                customer.get("phone", ""),
-                customer.get("address", ""),
-                customer.get("gender", ""),
-                customer.get("age", "")
-            )
-            self.customer_tree.insert("", tk.END, values=values)
+        try:
+            # Tải lại dữ liệu từ file
+            if not self.customer_manager.load_data():
+                messagebox.showerror("Lỗi", "Không thể tải dữ liệu khách hàng. Vui lòng kiểm tra file dữ liệu!")
+                return
+            
+            # Xóa tất cả các mục hiện tại
+            for item in self.customer_tree.get_children():
+                self.customer_tree.delete(item)
+            
+            # Lấy danh sách khách hàng từ customer_manager
+            customers = self.customer_manager.get_all_customers()
+            # Sắp xếp theo tên từ A-Z (không phân biệt hoa thường)
+            customers = sorted(customers, key=lambda c: c.get("name", "").lower())
+            
+            # Thêm các khách hàng vào treeview
+            for customer in customers:
+                values = (
+                    customer.get("id", ""),
+                    customer.get("name", ""),
+                    customer.get("email", ""),
+                    customer.get("phone", ""),
+                    customer.get("address", ""),
+                    customer.get("gender", ""),
+                    customer.get("age", "")
+                )
+                self.customer_tree.insert("", tk.END, values=values)
+            
+            # Hiển thị thông báo thành công
+            status_text = f"Đã tải {len(customers)} khách hàng"
+            messagebox.showinfo("Thành công", status_text)
+            
+        except Exception as e:
+            messagebox.showerror("Lỗi", f"Đã xảy ra lỗi khi tải danh sách khách hàng:\n{str(e)}")
+            print(f"Lỗi khi tải danh sách khách hàng: {e}")
     
     def search_customers(self):
         """
@@ -446,7 +461,7 @@ class MainUI:
         button_frame = ttk.Frame(main_frame)
         button_frame.pack(side=tk.BOTTOM, fill=tk.X, pady=10)
         
-        edit_button = ttk.Button(button_frame, text="Chỉnh sửa", 
+        edit_button = ttk.Button(button_frame, text="Chỉnh sửa thông tin", 
                                 command=lambda: self.edit_customer(customer_id, detail_window))
         edit_button.pack(side=tk.LEFT, padx=5)
         
@@ -535,10 +550,9 @@ class MainUI:
         if confirm:
             self.user_manager.logout()
             self.root.destroy()
-            
-            # Khởi động lại ứng dụng
-            from main import restart_app
-            restart_app()
+            # Quay lại màn hình đăng nhập
+            import main
+            main.start_app()
     
     def show_add_customer_form(self):
         """
@@ -584,12 +598,12 @@ class MainUI:
         
         # Giới tính
         ttk.Label(form_frame, text="Giới tính:").grid(row=4, column=0, sticky=tk.W, pady=5)
-        gender_var = tk.StringVar(value="male")
+        gender_var = tk.StringVar(value="Nam")
         gender_frame = ttk.Frame(form_frame)
         gender_frame.grid(row=4, column=1, sticky=tk.W, pady=5)
         
-        ttk.Radiobutton(gender_frame, text="Nam", variable=gender_var, value="male").pack(side=tk.LEFT, padx=5)
-        ttk.Radiobutton(gender_frame, text="Nữ", variable=gender_var, value="female").pack(side=tk.LEFT, padx=5)
+        ttk.Radiobutton(gender_frame, text="Nam", variable=gender_var, value="Nam").pack(side=tk.LEFT, padx=5)
+        ttk.Radiobutton(gender_frame, text="Nữ", variable=gender_var, value="Nữ").pack(side=tk.LEFT, padx=5)
         
         # Tuổi
         ttk.Label(form_frame, text="Tuổi:").grid(row=5, column=0, sticky=tk.W, pady=5)
@@ -640,17 +654,20 @@ class MainUI:
             "age": age
         }
         
-        # Thêm vào danh sách
-        self.customer_manager.add_customer(new_customer)
-        
-        # Làm mới danh sách
-        self.load_customers()
-        
-        # Đóng cửa sổ form
-        window.destroy()
-        
-        # Thông báo thành công
-        messagebox.showinfo("Thành công", "Đã thêm khách hàng mới!")
+        try:
+            # Thêm vào danh sách
+            self.customer_manager.add_customer(new_customer)
+            
+            # Làm mới danh sách
+            self.load_customers()
+            
+            # Đóng cửa sổ form
+            window.destroy()
+            
+            # Thông báo thành công
+            messagebox.showinfo("Thành công", "Đã thêm khách hàng mới!")
+        except ValueError as e:
+            messagebox.showerror("Lỗi", str(e))
     
     def edit_selected_customer(self):
         """
@@ -718,12 +735,12 @@ class MainUI:
         
         # Giới tính
         ttk.Label(form_frame, text="Giới tính:").grid(row=4, column=0, sticky=tk.W, pady=5)
-        gender_var = tk.StringVar(value=customer.get("gender", "male"))
+        gender_var = tk.StringVar(value=customer.get("gender", "Nam"))
         gender_frame = ttk.Frame(form_frame)
         gender_frame.grid(row=4, column=1, sticky=tk.W, pady=5)
         
-        ttk.Radiobutton(gender_frame, text="Nam", variable=gender_var, value="male").pack(side=tk.LEFT, padx=5)
-        ttk.Radiobutton(gender_frame, text="Nữ", variable=gender_var, value="female").pack(side=tk.LEFT, padx=5)
+        ttk.Radiobutton(gender_frame, text="Nam", variable=gender_var, value="Nam").pack(side=tk.LEFT, padx=5)
+        ttk.Radiobutton(gender_frame, text="Nữ", variable=gender_var, value="Nữ").pack(side=tk.LEFT, padx=5)
         
         # Tuổi
         ttk.Label(form_frame, text="Tuổi:").grid(row=5, column=0, sticky=tk.W, pady=5)
@@ -780,24 +797,27 @@ class MainUI:
             "age": age
         })
         
-        # Lưu lại
-        success = self.customer_manager.update_customer(customer_id, updated_customer)
-        
-        if success:
-            # Làm mới danh sách
-            self.load_customers()
+        try:
+            # Lưu lại
+            success = self.customer_manager.update_customer(customer_id, updated_customer)
             
-            # Đóng cửa sổ form
-            window.destroy()
-            
-            # Đóng cửa sổ chi tiết nếu có
-            if parent_window:
-                parent_window.destroy()
-            
-            # Thông báo thành công
-            messagebox.showinfo("Thành công", "Đã cập nhật thông tin khách hàng!")
-        else:
-            messagebox.showerror("Lỗi", "Không thể cập nhật thông tin khách hàng!")
+            if success:
+                # Làm mới danh sách
+                self.load_customers()
+                
+                # Đóng cửa sổ form
+                window.destroy()
+                
+                # Đóng cửa sổ chi tiết nếu có
+                if parent_window:
+                    parent_window.destroy()
+                
+                # Thông báo thành công
+                messagebox.showinfo("Thành công", "Đã cập nhật thông tin khách hàng!")
+            else:
+                messagebox.showerror("Lỗi", "Không thể cập nhật thông tin khách hàng!")
+        except ValueError as e:
+            messagebox.showerror("Lỗi", str(e))
     
     def delete_selected_customer(self):
         """
@@ -865,19 +885,27 @@ class MainUI:
         """
         Lấy ID của người dùng đang được chọn
         """
-        if not self.user_manager.is_admin():
-            messagebox.showwarning("Cảnh báo", "Bạn không có quyền thực hiện chức năng này!")
-            return None
-        
         selected_items = self.user_tree.selection()
         
         if not selected_items:
             messagebox.showwarning("Cảnh báo", "Vui lòng chọn một người dùng!")
             return None
         
-        # Lấy giá trị của cột id
-        user_id = self.user_tree.item(selected_items[0])["values"][0]
-        return user_id
+        try:
+            # Lấy giá trị của cột id
+            values = self.user_tree.item(selected_items[0])["values"]
+            if not values or len(values) == 0:
+                messagebox.showerror("Lỗi", "Không tìm thấy dữ liệu người dùng được chọn!")
+                return None
+                
+            user_id = str(values[0])  # Đảm bảo ID là dạng chuỗi
+            print(f"Đã chọn người dùng có ID: {user_id}")
+            return user_id
+            
+        except Exception as e:
+            print(f"Lỗi khi lấy ID người dùng: {e}")
+            messagebox.showerror("Lỗi", "Không thể lấy thông tin người dùng được chọn!")
+            return None
     
     def view_user_details(self, event):
         """
@@ -1240,12 +1268,95 @@ class MainUI:
         """
         Hiển thị form thêm người dùng mới
         """
-        if not self.user_manager.is_admin():
-            messagebox.showwarning("Cảnh báo", "Bạn không có quyền thực hiện chức năng này!")
+        # Tạo cửa sổ form
+        form_window = tk.Toplevel(self.root)
+        form_window.title("Thêm người dùng mới")
+        form_window.geometry("500x450")
+        form_window.resizable(False, False)
+        
+        # Frame chính
+        main_frame = ttk.Frame(form_window, padding=20)
+        main_frame.pack(fill=tk.BOTH, expand=True)
+        
+        # Tiêu đề
+        title_label = ttk.Label(main_frame, text="THÊM NGƯỜI DÙNG MỚI", style="Title.TLabel")
+        title_label.pack(pady=10)
+        
+        # Form nhập liệu
+        form_frame = ttk.Frame(main_frame)
+        form_frame.pack(fill=tk.BOTH, expand=True, pady=10)
+        
+        # Tên đăng nhập
+        ttk.Label(form_frame, text="Tên đăng nhập:").grid(row=0, column=0, sticky=tk.W, pady=5)
+        username_entry = ttk.Entry(form_frame, width=40)
+        username_entry.grid(row=0, column=1, sticky=tk.W, pady=5)
+        
+        # Mật khẩu
+        ttk.Label(form_frame, text="Mật khẩu:").grid(row=1, column=0, sticky=tk.W, pady=5)
+        password_entry = ttk.Entry(form_frame, width=40, show="*")
+        password_entry.grid(row=1, column=1, sticky=tk.W, pady=5)
+        
+        # Họ tên
+        ttk.Label(form_frame, text="Họ tên:").grid(row=2, column=0, sticky=tk.W, pady=5)
+        fullname_entry = ttk.Entry(form_frame, width=40)
+        fullname_entry.grid(row=2, column=1, sticky=tk.W, pady=5)
+        
+        # Vai trò
+        ttk.Label(form_frame, text="Vai trò:").grid(row=3, column=0, sticky=tk.W, pady=5)
+        role_var = tk.StringVar(value="user")
+        role_frame = ttk.Frame(form_frame)
+        role_frame.grid(row=3, column=1, sticky=tk.W, pady=5)
+        
+        ttk.Radiobutton(role_frame, text="Người dùng", variable=role_var, value="user").pack(side=tk.LEFT, padx=5)
+        ttk.Radiobutton(role_frame, text="Quản trị viên", variable=role_var, value="admin").pack(side=tk.LEFT, padx=5)
+        
+        # Nút lưu và hủy
+        button_frame = ttk.Frame(main_frame)
+        button_frame.pack(side=tk.BOTTOM, fill=tk.X, pady=10)
+        
+        save_button = ttk.Button(button_frame, text="Lưu", 
+                               command=lambda: self.save_new_user(
+                                   username_entry.get(),
+                                   password_entry.get(),
+                                   fullname_entry.get(),
+                                   role_var.get(),
+                                   form_window))
+        save_button.pack(side=tk.LEFT, padx=5)
+        
+        cancel_button = ttk.Button(button_frame, text="Hủy", command=form_window.destroy)
+        cancel_button.pack(side=tk.RIGHT, padx=5)
+    
+    def save_new_user(self, username, password, full_name, role, window):
+        """
+        Lưu thông tin người dùng mới
+        """
+        # Kiểm tra dữ liệu nhập vào
+        if not username or not password or not full_name:
+            messagebox.showerror("Lỗi", "Vui lòng nhập đầy đủ thông tin!")
             return
         
-        # Chức năng này sẽ được triển khai khi cần thiết
-        messagebox.showinfo("Thông báo", "Chức năng đang được phát triển!")
+        # Tạo đối tượng người dùng mới
+        new_user = {
+            "username": username,
+            "password": password,
+            "full_name": full_name,
+            "role": role
+        }
+        
+        # Thêm người dùng mới
+        success, message = self.user_manager.add_user(new_user)
+        
+        if success:
+            # Làm mới danh sách
+            self.load_users()
+            
+            # Đóng cửa sổ form
+            window.destroy()
+            
+            # Thông báo thành công
+            messagebox.showinfo("Thành công", message)
+        else:
+            messagebox.showerror("Lỗi", message)
     
     def show_help(self):
         """
@@ -1293,7 +1404,7 @@ class MainUI:
         
         # Hiển thị hộp thoại thông tin
         messagebox.showinfo("Thông tin ứng dụng", about_text)
-        
+    
     def show_current_user_profile(self):
         """
         Hiển thị thông tin cá nhân của người dùng hiện tại
@@ -1303,114 +1414,78 @@ class MainUI:
             messagebox.showerror("Lỗi", "Không tìm thấy thông tin người dùng!")
             return
             
-        # Sử dụng phương thức view_selected_user đã được nâng cấp
-        # để hiển thị thông tin cá nhân bao gồm ảnh đại diện
         user_id = current_user.get("id")
-        
-        # Lấy thông tin người dùng
         user = self.user_manager.get_user_by_id(user_id)
         if not user:
             messagebox.showerror("Lỗi", "Không tìm thấy thông tin người dùng!")
             return
             
-        # Tạo cửa sổ hiển thị chi tiết
         detail_window = tk.Toplevel(self.root)
         detail_window.title(f"Thông tin cá nhân: {user.get('username', '')}")
         detail_window.geometry("600x500")
         detail_window.resizable(False, False)
         
-        # Frame chính
         main_frame = ttk.Frame(detail_window, padding=20)
         main_frame.pack(fill=tk.BOTH, expand=True)
         
-        # Tiêu đề
         title_label = ttk.Label(main_frame, text="THÔNG TIN CÁ NHÂN", style="Title.TLabel")
         title_label.pack(pady=10)
         
-        # Thêm một nút tải ảnh đại diện ở trên đầu để dễ nhìn thấy
-        upload_image_button = ttk.Button(main_frame, text="Tải ảnh đại diện mới", 
-                                      command=lambda: self.upload_user_image(user_id))
-        upload_image_button.pack(side=tk.TOP, pady=5)
-        
-        # Chia thành 2 phần: hình ảnh và thông tin chi tiết
         content_frame = ttk.Frame(main_frame)
         content_frame.pack(fill=tk.BOTH, expand=True, pady=10)
         
-        # Phần hình ảnh
         image_frame = ttk.LabelFrame(content_frame, text="Ảnh đại diện", padding=10, width=200)
         image_frame.pack(side=tk.LEFT, fill=tk.Y, padx=10, pady=10)
         
-        # Hiển thị ảnh đại diện
         self.user_image_label = ttk.Label(image_frame, text="Không có ảnh")
         self.user_image_label.pack(padx=10, pady=10)
         
-        # Kiểm tra và hiển thị ảnh
         image_path = user.get("picture", "")
         if image_path and os.path.exists(image_path):
             try:
-                # Tải ảnh từ file
                 image = Image.open(image_path)
                 image = image.resize((150, 150), Image.LANCZOS)
                 photo = ImageTk.PhotoImage(image)
-                
-                # Hiển thị ảnh
                 self.user_image_label.config(image=photo, text="")
                 self.user_image_label.image = photo
             except Exception as e:
                 print(f"Lỗi khi tải ảnh: {e}")
                 self.user_image_label.config(text="Không thể tải ảnh")
         
-        # Nút tải ảnh đại diện mới
         is_current_user = self.user_manager.get_current_user().get('id') == user_id
         is_admin = self.user_manager.is_admin()
-        
         if is_current_user or is_admin:
             upload_button = ttk.Button(image_frame, text="Tải ảnh mới", 
                                     command=lambda: self.upload_user_image(user_id))
             upload_button.pack(pady=10)
         
-        # Frame thông tin chi tiết
         info_frame = ttk.LabelFrame(content_frame, text="Thông tin chi tiết", padding=10)
         info_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=10, pady=10)
         
-        # Hiển thị thông tin
         ttk.Label(info_frame, text="ID:").grid(row=0, column=0, sticky=tk.W, pady=5)
         ttk.Label(info_frame, text=user.get("id", "")).grid(row=0, column=1, sticky=tk.W, pady=5)
-        
         ttk.Label(info_frame, text="Tên đăng nhập:").grid(row=1, column=0, sticky=tk.W, pady=5)
         ttk.Label(info_frame, text=user.get("username", "")).grid(row=1, column=1, sticky=tk.W, pady=5)
-        
         ttk.Label(info_frame, text="Họ tên:").grid(row=2, column=0, sticky=tk.W, pady=5)
         ttk.Label(info_frame, text=user.get("full_name", "")).grid(row=2, column=1, sticky=tk.W, pady=5)
-        
         ttk.Label(info_frame, text="Vai trò:").grid(row=3, column=0, sticky=tk.W, pady=5)
         role_text = "Quản trị viên" if user.get("role") == "admin" else "Người dùng"
         ttk.Label(info_frame, text=role_text).grid(row=3, column=1, sticky=tk.W, pady=5)
-        
         ttk.Label(info_frame, text="Ngày tạo:").grid(row=4, column=0, sticky=tk.W, pady=5)
         ttk.Label(info_frame, text=user.get("created_at", "")).grid(row=4, column=1, sticky=tk.W, pady=5)
-        
         if "updated_at" in user:
             ttk.Label(info_frame, text="Cập nhật lần cuối:").grid(row=5, column=0, sticky=tk.W, pady=5)
             ttk.Label(info_frame, text=user.get("updated_at", "")).grid(row=5, column=1, sticky=tk.W, pady=5)
         
-        # Các nút
         button_frame = ttk.Frame(main_frame)
         button_frame.pack(side=tk.BOTTOM, fill=tk.X, pady=10)
         
         edit_button = ttk.Button(button_frame, text="Chỉnh sửa thông tin", 
                                command=lambda: self.edit_user(user_id, detail_window))
         edit_button.pack(side=tk.LEFT, padx=5)
-        
         password_button = ttk.Button(button_frame, text="Đổi mật khẩu", 
                                    command=lambda: self.show_change_password_form())
         password_button.pack(side=tk.LEFT, padx=5)
-        
-        # Nút tải ảnh đại diện
-        another_upload_button = ttk.Button(button_frame, text="Tải ảnh đại diện", 
-                                         command=lambda: self.upload_user_image(user_id))
-        another_upload_button.pack(side=tk.LEFT, padx=5)
-        
         close_button = ttk.Button(button_frame, text="Đóng", command=detail_window.destroy)
         close_button.pack(side=tk.RIGHT, padx=5)
     
